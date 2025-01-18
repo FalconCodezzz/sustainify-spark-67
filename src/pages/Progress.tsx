@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Leaf, Trophy, Star } from 'lucide-react';
+import { Leaf, Trophy, Star, Award, TreePine, Sprout } from 'lucide-react';
 
 interface Achievement {
   id: string;
@@ -12,12 +12,22 @@ interface Achievement {
   progress: number;
 }
 
+const levels = [
+  { name: "Eco Novice", minScore: 0, color: "text-green-400" },
+  { name: "Green Guardian", minScore: 100, color: "text-emerald-500" },
+  { name: "Sustainability Scout", minScore: 250, color: "text-teal-600" },
+  { name: "Earth Defender", minScore: 500, color: "text-blue-600" },
+  { name: "Climate Champion", minScore: 1000, color: "text-purple-600" },
+  { name: "Eco Warrior", minScore: 2000, color: "text-amber-600" },
+];
+
 const ProgressPage = () => {
   const [achievements, setAchievements] = useState<Achievement[]>([]);
-  const [totalScore, setTotalScore] = useState(0);
+  const [totalScore, setTotalScore] = useState(1250);
+  const [currentLevel, setCurrentLevel] = useState(levels[0]);
 
   useEffect(() => {
-    // In a real app, this would come from localStorage or an API
+    // Mock achievements data
     const mockAchievements: Achievement[] = [
       {
         id: '1',
@@ -43,48 +53,99 @@ const ProgressPage = () => {
     ];
 
     setAchievements(mockAchievements);
-    setTotalScore(1250); // Mock total score
-  }, []);
+
+    // Set current level based on total score
+    const level = levels.reduce((acc, level) => {
+      if (totalScore >= level.minScore) return level;
+      return acc;
+    }, levels[0]);
+    setCurrentLevel(level);
+  }, [totalScore]);
+
+  const nextLevel = levels[levels.indexOf(currentLevel) + 1];
+  const progressToNextLevel = nextLevel
+    ? ((totalScore - currentLevel.minScore) / (nextLevel.minScore - currentLevel.minScore)) * 100
+    : 100;
 
   return (
-    <div className="container mx-auto px-4 py-24">
+    <div className="container mx-auto px-4 py-12">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="max-w-4xl mx-auto"
+        className="max-w-7xl mx-auto"
       >
         <h1 className="text-4xl font-bold text-center mb-8 bg-clip-text text-transparent bg-eco-gradient">
           Your Sustainability Journey
         </h1>
 
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="text-2xl">Total Impact Score</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-5xl font-bold text-eco-primary mb-4">
-              {totalScore}
-            </div>
-            <Progress value={75} className="h-2" />
-            <p className="text-sm text-gray-600 mt-2">
-              You're in the top 25% of eco-warriors!
-            </p>
-          </CardContent>
-        </Card>
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          {/* Current Level Card */}
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle className="text-2xl flex items-center gap-2">
+                <Award className={`h-8 w-8 ${currentLevel.color}`} />
+                Current Level: {currentLevel.name}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-5xl font-bold text-eco-primary mb-4">
+                {totalScore} points
+              </div>
+              <Progress value={progressToNextLevel} className="h-2 mb-2" />
+              {nextLevel && (
+                <p className="text-sm text-gray-600">
+                  {nextLevel.minScore - totalScore} points until {nextLevel.name}
+                </p>
+              )}
+            </CardContent>
+          </Card>
 
-        <div className="grid gap-6">
-          {achievements.map((achievement) => (
-            <motion.div
-              key={achievement.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-eco-light rounded-full">
+          {/* Level Progress */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-xl">Level Progress</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {levels.map((level, index) => (
+                  <div
+                    key={level.name}
+                    className={`flex items-center gap-3 p-3 rounded-lg ${
+                      currentLevel.name === level.name ? 'bg-eco-light' : ''
+                    }`}
+                  >
+                    {index <= levels.indexOf(currentLevel) ? (
+                      <TreePine className={`h-5 w-5 ${level.color}`} />
+                    ) : (
+                      <Sprout className="h-5 w-5 text-gray-400" />
+                    )}
+                    <div className="flex-1">
+                      <p className={`font-medium ${level.color}`}>{level.name}</p>
+                      <p className="text-sm text-gray-600">{level.minScore} points</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Recent Achievements */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-xl">Recent Achievements</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {achievements.map((achievement) => (
+                  <motion.div
+                    key={achievement.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="flex items-center gap-4 p-4 bg-eco-light/50 rounded-lg"
+                  >
+                    <div className="p-3 bg-white rounded-full">
                       {achievement.icon}
                     </div>
                     <div className="flex-1">
@@ -100,11 +161,11 @@ const ProgressPage = () => {
                     <div className="text-lg font-semibold text-eco-primary">
                       {achievement.progress}%
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+                  </motion.div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </motion.div>
     </div>
