@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { motion } from 'framer-motion';
+import { useProgress } from '@/contexts/ProgressContext';
 
 interface Message {
   id: number;
@@ -13,6 +14,7 @@ interface Message {
 }
 
 const Chat = () => {
+  const { addPoints } = useProgress();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
@@ -35,6 +37,9 @@ const Chat = () => {
 
     setMessages([...messages, userMessage]);
     setNewMessage('');
+
+    // Update chat achievement and add points
+    addPoints(5, 'chat');
 
     // Placeholder for AI response
     setTimeout(() => {
