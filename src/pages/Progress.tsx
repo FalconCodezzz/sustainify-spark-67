@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Leaf, Trophy, Star, Award, TreePine, Sprout } from 'lucide-react';
+import { Leaf, Trophy, Star, Award, TreePine, Sprout, Gamepad2 } from 'lucide-react';
 import { useProgress, LEVELS } from '@/contexts/ProgressContext';
 
 const ProgressPage = () => {
