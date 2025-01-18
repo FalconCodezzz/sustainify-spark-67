@@ -6,14 +6,10 @@ import { useProgress } from '@/contexts/ProgressContext';
 import { RecycleSortGame } from '@/components/games/RecycleSortGame';
 import { EcoTrivia } from '@/components/games/EcoTrivia';
 import { SustainabilityScenarios } from '@/components/games/SustainabilityScenarios';
-import ReactConfetti from 'react-confetti';
-import { useWindowSize } from 'react-use';
 
 const Games = () => {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
   const { totalScore } = useProgress();
-  const { width, height } = useWindowSize();
-  const [showConfetti, setShowConfetti] = useState(false);
 
   const games = [
     {
@@ -47,11 +43,11 @@ const Games = () => {
 
     switch (selectedGame) {
       case 'trivia':
-        return <EcoTrivia onLevelUp={() => setShowConfetti(true)} />;
+        return <EcoTrivia onLevelUp={() => {}} />;
       case 'recycle-sort':
-        return <RecycleSortGame onLevelUp={() => setShowConfetti(true)} />;
+        return <RecycleSortGame onLevelUp={() => {}} />;
       case 'scenarios':
-        return <SustainabilityScenarios onLevelUp={() => setShowConfetti(true)} />;
+        return <SustainabilityScenarios onLevelUp={() => {}} />;
       default:
         return null;
     }
@@ -59,15 +55,6 @@ const Games = () => {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      {showConfetti && (
-        <ReactConfetti
-          width={width}
-          height={height}
-          recycle={false}
-          numberOfPieces={200}
-          onConfettiComplete={() => setShowConfetti(false)}
-        />
-      )}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
