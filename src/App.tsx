@@ -7,6 +7,8 @@ import Navigation from "./components/Navigation";
 import Index from "./pages/Index";
 import Games from "./pages/Games";
 import Progress from "./pages/Progress";
+import Chat from "./pages/Chat";
+import RecyclingCheck from "./pages/RecyclingCheck";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +24,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/games" element={<Games />} />
             <Route path="/progress" element={<Progress />} />
+            <Route path="/chat" element={<Chat />} />
+            <Route path="/recycling-check" element={<RecyclingCheck />} />
           </Routes>
         </div>
       </BrowserRouter>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Recycle, MessageSquare } from 'lucide-react';
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -9,7 +9,8 @@ const Navigation = () => {
   const links = [
     { name: 'Home', path: '/' },
     { name: 'Games', path: '/games' },
-    { name: 'Chat', path: '/chat' },
+    { name: 'Recycling Check', path: '/recycling-check', icon: <Recycle className="w-4 h-4" /> },
+    { name: 'Chat', path: '/chat', icon: <MessageSquare className="w-4 h-4" /> },
     { name: 'Progress', path: '/progress' },
   ];
 
@@ -33,12 +34,13 @@ const Navigation = () => {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
                   isActive(link.path)
                     ? 'text-eco-primary'
                     : 'text-eco-dark hover:text-eco-primary'
                 }`}
               >
+                {link.icon}
                 {link.name}
               </Link>
             ))}
@@ -64,13 +66,14 @@ const Navigation = () => {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`block px-3 py-2 rounded-md text-base font-medium ${
+                className={`block px-3 py-2 rounded-md text-base font-medium flex items-center gap-2 ${
                   isActive(link.path)
                     ? 'text-eco-primary'
                     : 'text-eco-dark hover:text-eco-primary'
                 }`}
                 onClick={() => setIsOpen(false)}
               >
+                {link.icon}
                 {link.name}
               </Link>
             ))}
