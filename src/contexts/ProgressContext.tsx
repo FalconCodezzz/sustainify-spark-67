@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { toast } from "@/hooks/use-toast";
 
 type Level = {
   name: string;
@@ -88,7 +89,19 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const nextLevel = LEVELS[LEVELS.indexOf(currentLevel) + 1] || null;
 
   const addPoints = (points: number, source: string) => {
-    setTotalScore(prev => prev + points);
+    setTotalScore(prev => {
+      const newScore = prev + points;
+      const newLevel = LEVELS.find(level => newScore >= level.minScore && prev < level.minScore);
+      
+      if (newLevel) {
+        toast({
+          title: "Level Up!",
+          description: `Congratulations! You've reached ${newLevel.name}!`,
+        });
+      }
+
+      return newScore;
+    });
     
     // Update relevant achievement
     if (source === 'recycling' || source === 'games' || source === 'chat') {
@@ -100,6 +113,14 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setAchievements(prev => prev.map(achievement => {
       if (achievement.id === id) {
         const newProgress = Math.min(achievement.progress + progress, achievement.maxProgress);
+        if (newProgress === achievement.maxProgress && achievement.progress !== achievement.maxProgress) {
+          toast({
+            title: "Achievement Unlocked!",
+            description: `${achievement.title} - ${achievement.description}`,
+          });
+          // Award bonus points for completing an achievement
+          setTotalScore(prev => prev + 50);
+        }
         return { ...achievement, progress: newProgress };
       }
       return achievement;

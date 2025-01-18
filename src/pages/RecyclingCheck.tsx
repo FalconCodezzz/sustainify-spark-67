@@ -3,10 +3,13 @@ import { Upload, Image as ImageIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useProgress } from '@/contexts/ProgressContext';
+import { toast } from "@/hooks/use-toast";
 
 const RecyclingCheck = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const { addPoints } = useProgress();
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -24,6 +27,13 @@ const RecyclingCheck = () => {
     // Placeholder for AI analysis
     setTimeout(() => {
       setIsAnalyzing(false);
+      // Award points for using the recycling check feature
+      const points = 5;
+      addPoints(points, 'recycling');
+      toast({
+        title: "Analysis Complete",
+        description: `You earned ${points} points for checking recyclability!`,
+      });
     }, 2000);
   };
 

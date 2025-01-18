@@ -1,11 +1,10 @@
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Gamepad2, Brain, TreePine } from 'lucide-react';
+import { TreePine, Brain, Gamepad2 } from 'lucide-react';
 import { useState } from 'react';
 import { useProgress } from '@/contexts/ProgressContext';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "@/hooks/use-toast";
 
 type GameQuestion = {
   question: string;
@@ -38,7 +37,6 @@ const Games = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const { addPoints } = useProgress();
-  const { toast } = useToast();
 
   const games = [
     {
@@ -70,20 +68,27 @@ const Games = () => {
   const handleAnswer = (answerIndex: number) => {
     const correct = answerIndex === TRIVIA_QUESTIONS[currentQuestion].correctAnswer;
     if (correct) {
-      setScore(prev => prev + 10);
+      const points = 10;
+      setScore(prev => prev + points);
+      addPoints(points, 'games');
       toast({
         title: "Correct!",
-        description: "You earned 10 points!",
+        description: `You earned ${points} points!`,
+      });
+    } else {
+      toast({
+        title: "Incorrect",
+        description: "Try again!",
+        variant: "destructive",
       });
     }
 
     if (currentQuestion < TRIVIA_QUESTIONS.length - 1) {
       setCurrentQuestion(prev => prev + 1);
     } else {
-      addPoints(score, 'games');
       toast({
         title: "Game Complete!",
-        description: `You scored ${score} points!`,
+        description: `You scored ${score + (correct ? 10 : 0)} points!`,
       });
       setSelectedGame(null);
       setCurrentQuestion(0);
@@ -94,10 +99,18 @@ const Games = () => {
   const handleSort = (item: string, bin: string) => {
     const recycleItem = RECYCLE_ITEMS.find(i => i.name === item);
     if (recycleItem && recycleItem.correct === bin) {
-      setScore(prev => prev + 10);
+      const points = 10;
+      setScore(prev => prev + points);
+      addPoints(points, 'games');
       toast({
         title: "Correct!",
-        description: "You earned 10 points!",
+        description: `You earned ${points} points!`,
+      });
+    } else {
+      toast({
+        title: "Incorrect",
+        description: "Try again!",
+        variant: "destructive",
       });
     }
   };
