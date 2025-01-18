@@ -4,6 +4,10 @@ import { Button } from '@/components/ui/button';
 import { useProgress } from '@/contexts/ProgressContext';
 import { toast } from "@/hooks/use-toast";
 
+interface EcoTriviaProps {
+  onLevelUp: () => void;
+}
+
 const TRIVIA_QUESTIONS = [
   {
     question: "Which of these items is recyclable?",
@@ -17,17 +21,30 @@ const TRIVIA_QUESTIONS = [
   }
 ];
 
-export const EcoTrivia = () => {
+export const EcoTrivia = ({ onLevelUp }: EcoTriviaProps) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
-  const { addPoints } = useProgress();
+  const { addPoints, totalScore } = useProgress();
 
   const handleAnswer = (answerIndex: number) => {
     const correct = answerIndex === TRIVIA_QUESTIONS[currentQuestion].correctAnswer;
     if (correct) {
       const points = 10;
       setScore(prev => prev + points);
+      const prevScore = totalScore;
       addPoints(points, 'games');
+      
+      // Check if we crossed a level threshold
+      if (
+        (prevScore < 100 && totalScore >= 100) ||
+        (prevScore < 250 && totalScore >= 250) ||
+        (prevScore < 500 && totalScore >= 500) ||
+        (prevScore < 1000 && totalScore >= 1000) ||
+        (prevScore < 2000 && totalScore >= 2000)
+      ) {
+        onLevelUp();
+      }
+      
       toast({
         title: "Correct!",
         description: `You earned ${points} points!`,

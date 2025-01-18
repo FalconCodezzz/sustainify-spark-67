@@ -4,6 +4,10 @@ import { Button } from '@/components/ui/button';
 import { useProgress } from '@/contexts/ProgressContext';
 import { toast } from "@/hooks/use-toast";
 
+interface RecycleSortGameProps {
+  onLevelUp: () => void;
+}
+
 const RECYCLE_ITEMS = [
   { name: "Plastic Bottle", correct: "recyclable" },
   { name: "Food Waste", correct: "compost" },
@@ -11,14 +15,27 @@ const RECYCLE_ITEMS = [
   { name: "Broken Glass", correct: "trash" }
 ];
 
-export const RecycleSortGame = () => {
-  const { addPoints } = useProgress();
+export const RecycleSortGame = ({ onLevelUp }: RecycleSortGameProps) => {
+  const { addPoints, totalScore } = useProgress();
 
   const handleSort = (item: string, bin: string) => {
     const recycleItem = RECYCLE_ITEMS.find(i => i.name === item);
     if (recycleItem && recycleItem.correct === bin) {
       const points = 10;
+      const prevScore = totalScore;
       addPoints(points, 'games');
+      
+      // Check if we crossed a level threshold
+      if (
+        (prevScore < 100 && totalScore >= 100) ||
+        (prevScore < 250 && totalScore >= 250) ||
+        (prevScore < 500 && totalScore >= 500) ||
+        (prevScore < 1000 && totalScore >= 1000) ||
+        (prevScore < 2000 && totalScore >= 2000)
+      ) {
+        onLevelUp();
+      }
+      
       toast({
         title: "Correct!",
         description: `You earned ${points} points!`,

@@ -6,10 +6,14 @@ import { useProgress } from '@/contexts/ProgressContext';
 import { RecycleSortGame } from '@/components/games/RecycleSortGame';
 import { EcoTrivia } from '@/components/games/EcoTrivia';
 import { SustainabilityScenarios } from '@/components/games/SustainabilityScenarios';
+import ReactConfetti from 'react-confetti';
+import { useWindowSize } from 'react-use';
 
 const Games = () => {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
-  const [score, setScore] = useState(0);
+  const { totalScore } = useProgress();
+  const { width, height } = useWindowSize();
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const games = [
     {
@@ -43,11 +47,11 @@ const Games = () => {
 
     switch (selectedGame) {
       case 'trivia':
-        return <EcoTrivia />;
+        return <EcoTrivia onLevelUp={() => setShowConfetti(true)} />;
       case 'recycle-sort':
-        return <RecycleSortGame />;
+        return <RecycleSortGame onLevelUp={() => setShowConfetti(true)} />;
       case 'scenarios':
-        return <SustainabilityScenarios />;
+        return <SustainabilityScenarios onLevelUp={() => setShowConfetti(true)} />;
       default:
         return null;
     }
@@ -55,6 +59,15 @@ const Games = () => {
 
   return (
     <div className="container mx-auto px-4 py-12">
+      {showConfetti && (
+        <ReactConfetti
+          width={width}
+          height={height}
+          recycle={false}
+          numberOfPieces={200}
+          onConfettiComplete={() => setShowConfetti(false)}
+        />
+      )}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -101,7 +114,7 @@ const Games = () => {
                 <CardTitle className="text-xl">Current Score</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-eco-primary">{score} points</div>
+                <div className="text-3xl font-bold text-eco-primary">{totalScore} points</div>
               </CardContent>
             </Card>
           </div>
