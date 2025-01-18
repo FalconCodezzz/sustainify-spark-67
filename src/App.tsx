@@ -1,24 +1,18 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Navigation from "./components/Navigation";
-import Index from "./pages/Index";
-import Games from "./pages/Games";
-import Progress from "./pages/Progress";
-import Chat from "./pages/Chat";
-import RecyclingCheck from "./pages/RecyclingCheck";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Navigation from './components/Navigation';
+import Index from './pages/Index';
+import Games from './pages/Games';
+import Progress from './pages/Progress';
+import Chat from './pages/Chat';
+import RecyclingCheck from './pages/RecyclingCheck';
+import { ProgressProvider } from './contexts/ProgressContext';
+import { Toaster } from '@/components/ui/toaster';
 
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <div className="min-h-screen bg-eco-light">
+function App() {
+  return (
+    <ProgressProvider>
+      <Router>
+        <div className="min-h-screen bg-background">
           <Navigation />
           <Routes>
             <Route path="/" element={<Index />} />
@@ -27,10 +21,11 @@ const App = () => (
             <Route path="/chat" element={<Chat />} />
             <Route path="/recycling-check" element={<RecyclingCheck />} />
           </Routes>
+          <Toaster />
         </div>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+      </Router>
+    </ProgressProvider>
+  );
+}
 
 export default App;

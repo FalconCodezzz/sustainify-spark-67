@@ -2,13 +2,43 @@ import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Gamepad2, Brain, TreePine, Upload, Send } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Gamepad2, Brain, TreePine } from 'lucide-react';
 import { useState } from 'react';
+import { useProgress } from '@/contexts/ProgressContext';
+import { useToast } from '@/components/ui/use-toast';
+
+type GameQuestion = {
+  question: string;
+  options: string[];
+  correctAnswer: number;
+};
+
+const TRIVIA_QUESTIONS: GameQuestion[] = [
+  {
+    question: "Which of these items is recyclable?",
+    options: ["Greasy pizza box", "Clean cardboard", "Used tissues", "Plastic bags"],
+    correctAnswer: 1
+  },
+  {
+    question: "What is the most effective way to reduce carbon footprint?",
+    options: ["Using public transport", "Eating less meat", "Reducing energy consumption", "All of the above"],
+    correctAnswer: 3
+  }
+];
+
+const RECYCLE_ITEMS = [
+  { name: "Plastic Bottle", correct: "recyclable" },
+  { name: "Food Waste", correct: "compost" },
+  { name: "Newspaper", correct: "recyclable" },
+  { name: "Broken Glass", correct: "trash" }
+];
 
 const Games = () => {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
-  const [chatMessage, setChatMessage] = useState('');
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [score, setScore] = useState(0);
+  const { addPoints } = useProgress();
+  const { toast } = useToast();
 
   const games = [
     {
@@ -37,6 +67,132 @@ const Games = () => {
     }
   ];
 
+  const handleAnswer = (answerIndex: number) => {
+    const correct = answerIndex === TRIVIA_QUESTIONS[currentQuestion].correctAnswer;
+    if (correct) {
+      setScore(prev => prev + 10);
+      toast({
+        title: "Correct!",
+        description: "You earned 10 points!",
+      });
+    }
+
+    if (currentQuestion < TRIVIA_QUESTIONS.length - 1) {
+      setCurrentQuestion(prev => prev + 1);
+    } else {
+      addPoints(score, 'games');
+      toast({
+        title: "Game Complete!",
+        description: `You scored ${score} points!`,
+      });
+      setSelectedGame(null);
+      setCurrentQuestion(0);
+      setScore(0);
+    }
+  };
+
+  const handleSort = (item: string, bin: string) => {
+    const recycleItem = RECYCLE_ITEMS.find(i => i.name === item);
+    if (recycleItem && recycleItem.correct === bin) {
+      setScore(prev => prev + 10);
+      toast({
+        title: "Correct!",
+        description: "You earned 10 points!",
+      });
+    }
+  };
+
+  const renderGameArea = () => {
+    if (!selectedGame) return null;
+
+    switch (selectedGame) {
+      case 'trivia':
+        return (
+          <Card className="w-full p-6">
+            <CardHeader>
+              <CardTitle>Question {currentQuestion + 1}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="mb-4">{TRIVIA_QUESTIONS[currentQuestion].question}</p>
+              <div className="grid gap-4">
+                {TRIVIA_QUESTIONS[currentQuestion].options.map((option, index) => (
+                  <Button
+                    key={index}
+                    onClick={() => handleAnswer(index)}
+                    variant="outline"
+                    className="w-full text-left"
+                  >
+                    {option}
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        );
+
+      case 'recycle-sort':
+        return (
+          <Card className="w-full p-6">
+            <CardHeader>
+              <CardTitle>Sort the Items</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  {RECYCLE_ITEMS.map((item) => (
+                    <Card key={item.name} className="p-4">
+                      <p>{item.name}</p>
+                    </Card>
+                  ))}
+                </div>
+                <div className="space-y-4">
+                  {['recyclable', 'compost', 'trash'].map((bin) => (
+                    <Button
+                      key={bin}
+                      onClick={() => handleSort(RECYCLE_ITEMS[0].name, bin)}
+                      variant="outline"
+                      className="w-full capitalize"
+                    >
+                      {bin} Bin
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+
+      case 'scenarios':
+        return (
+          <Card className="w-full p-6">
+            <CardHeader>
+              <CardTitle>Daily Scenario</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="mb-4">You notice a dripping faucet at home. What do you do?</p>
+              <div className="grid gap-4">
+                {[
+                  "Fix it immediately to save water",
+                  "Ignore it, it's just a small drip",
+                  "Put a bucket under it",
+                  "Report it to maintenance"
+                ].map((option, index) => (
+                  <Button
+                    key={index}
+                    onClick={() => handleAnswer(index)}
+                    variant="outline"
+                    className="w-full text-left"
+                  >
+                    {option}
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        );
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-12">
       <motion.div
@@ -50,7 +206,6 @@ const Games = () => {
         </h1>
         
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Games Selection */}
           <div className="lg:col-span-2">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {games.map((game, index) => (
@@ -77,51 +232,16 @@ const Games = () => {
               ))}
             </div>
 
-            {/* Game Area Placeholder */}
-            {selectedGame && (
-              <Card className="w-full h-[400px] bg-eco-light/50 flex items-center justify-center">
-                <p className="text-lg text-gray-600">Game area for {selectedGame} will be implemented here</p>
-              </Card>
-            )}
+            {renderGameArea()}
           </div>
 
-          {/* AI Chat & Image Analysis Area */}
           <div className="space-y-6">
-            {/* Image Analysis */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-xl">Recycling Check</CardTitle>
+                <CardTitle className="text-xl">Current Score</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                  <p className="mt-2 text-sm text-gray-600">Upload an image to check if it's recyclable</p>
-                </div>
-                <Button className="w-full bg-eco-gradient hover:opacity-90">
-                  Upload Image
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Chat Interface */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl">Eco Assistant</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="h-[200px] bg-eco-light/30 rounded-lg p-4 overflow-y-auto">
-                  <p className="text-sm text-gray-600">Chat messages will appear here...</p>
-                </div>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Ask about sustainability..."
-                    value={chatMessage}
-                    onChange={(e) => setChatMessage(e.target.value)}
-                  />
-                  <Button size="icon">
-                    <Send className="h-4 w-4" />
-                  </Button>
-                </div>
+              <CardContent>
+                <div className="text-3xl font-bold text-eco-primary">{score} points</div>
               </CardContent>
             </Card>
           </div>

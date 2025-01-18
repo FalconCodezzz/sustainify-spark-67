@@ -3,66 +3,11 @@ import { motion } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Leaf, Trophy, Star, Award, TreePine, Sprout } from 'lucide-react';
-
-interface Achievement {
-  id: string;
-  title: string;
-  description: string;
-  icon: JSX.Element;
-  progress: number;
-}
-
-const levels = [
-  { name: "Eco Novice", minScore: 0, color: "text-green-400" },
-  { name: "Green Guardian", minScore: 100, color: "text-emerald-500" },
-  { name: "Sustainability Scout", minScore: 250, color: "text-teal-600" },
-  { name: "Earth Defender", minScore: 500, color: "text-blue-600" },
-  { name: "Climate Champion", minScore: 1000, color: "text-purple-600" },
-  { name: "Eco Warrior", minScore: 2000, color: "text-amber-600" },
-];
+import { useProgress, LEVELS } from '@/contexts/ProgressContext';
 
 const ProgressPage = () => {
-  const [achievements, setAchievements] = useState<Achievement[]>([]);
-  const [totalScore, setTotalScore] = useState(1250);
-  const [currentLevel, setCurrentLevel] = useState(levels[0]);
+  const { totalScore, currentLevel, nextLevel, achievements } = useProgress();
 
-  useEffect(() => {
-    // Mock achievements data
-    const mockAchievements: Achievement[] = [
-      {
-        id: '1',
-        title: 'Recycling Pioneer',
-        description: 'Successfully identified 10 recyclable items',
-        icon: <Leaf className="w-6 h-6 text-eco-primary" />,
-        progress: 60
-      },
-      {
-        id: '2',
-        title: 'Sustainability Scholar',
-        description: 'Completed 5 eco-quizzes',
-        icon: <Trophy className="w-6 h-6 text-eco-secondary" />,
-        progress: 40
-      },
-      {
-        id: '3',
-        title: 'Community Champion',
-        description: 'Shared 3 sustainability tips',
-        icon: <Star className="w-6 h-6 text-eco-accent" />,
-        progress: 30
-      }
-    ];
-
-    setAchievements(mockAchievements);
-
-    // Set current level based on total score
-    const level = levels.reduce((acc, level) => {
-      if (totalScore >= level.minScore) return level;
-      return acc;
-    }, levels[0]);
-    setCurrentLevel(level);
-  }, [totalScore]);
-
-  const nextLevel = levels[levels.indexOf(currentLevel) + 1];
   const progressToNextLevel = nextLevel
     ? ((totalScore - currentLevel.minScore) / (nextLevel.minScore - currentLevel.minScore)) * 100
     : 100;
@@ -108,14 +53,14 @@ const ProgressPage = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {levels.map((level, index) => (
+                {LEVELS.map((level, index) => (
                   <div
                     key={level.name}
                     className={`flex items-center gap-3 p-3 rounded-lg ${
                       currentLevel.name === level.name ? 'bg-eco-light' : ''
                     }`}
                   >
-                    {index <= levels.indexOf(currentLevel) ? (
+                    {index <= LEVELS.indexOf(currentLevel) ? (
                       <TreePine className={`h-5 w-5 ${level.color}`} />
                     ) : (
                       <Sprout className="h-5 w-5 text-gray-400" />
@@ -146,7 +91,13 @@ const ProgressPage = () => {
                     className="flex items-center gap-4 p-4 bg-eco-light/50 rounded-lg"
                   >
                     <div className="p-3 bg-white rounded-full">
-                      {achievement.icon}
+                      {achievement.id === 'recycling' ? (
+                        <TreePine className="h-5 w-5 text-eco-primary" />
+                      ) : achievement.id === 'games' ? (
+                        <Gamepad2 className="h-5 w-5 text-eco-secondary" />
+                      ) : (
+                        <Star className="h-5 w-5 text-eco-accent" />
+                      )}
                     </div>
                     <div className="flex-1">
                       <h3 className="font-semibold mb-1">{achievement.title}</h3>
@@ -154,12 +105,12 @@ const ProgressPage = () => {
                         {achievement.description}
                       </p>
                       <Progress
-                        value={achievement.progress}
+                        value={(achievement.progress / achievement.maxProgress) * 100}
                         className="h-2 mt-2"
                       />
                     </div>
                     <div className="text-lg font-semibold text-eco-primary">
-                      {achievement.progress}%
+                      {Math.round((achievement.progress / achievement.maxProgress) * 100)}%
                     </div>
                   </motion.div>
                 ))}
